@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A source-backed comparison of alexgolec/schwab-py, Hu1kSmash/schwaby, jubishop/schwab-py, and yoshishima/schwab-py for the schwab-pi plugin.">
+<title>Schwab-py Fork Comparison</title>
+<style>
+:root { color-scheme: light dark; --bg:#0b1020; --panel:#11182b; --text:#e8edf8; --muted:#aeb8cf; --line:#293451; --link:#84b8ff; --accent:#66e3ba; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text); font:16px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
+main { max-width:1040px; margin:0 auto; padding:56px 24px 80px; }
+article { background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:clamp(24px,5vw,56px); box-shadow:0 20px 70px rgba(0,0,0,.25); }
+h1 { margin:0 0 8px; font-size:clamp(2rem,5vw,3.5rem); line-height:1.1; letter-spacing:-.035em; }
+h2 { margin-top:2.6em; padding-top:.6em; border-top:1px solid var(--line); font-size:1.65rem; }
+h3 { margin-top:2em; font-size:1.25rem; color:var(--accent); }
+p,li { color:var(--text); }
+strong { color:#fff; }
+a { color:var(--link); text-underline-offset:3px; }
+code { padding:.12rem .35rem; border-radius:5px; background:#070b15; color:#a7f3d0; }
+table { width:100%; border-collapse:collapse; display:block; overflow-x:auto; margin:1.5rem 0; }
+th,td { min-width:150px; padding:12px 14px; vertical-align:top; border:1px solid var(--line); }
+th { background:#18223a; text-align:left; }
+blockquote { margin:1.5rem 0; padding:.2rem 1rem; border-left:4px solid var(--accent); color:var(--muted); }
+.meta { color:var(--muted); margin:0 0 2rem; }
+footer { margin-top:28px; text-align:center; color:var(--muted); font-size:.9rem; }
+@media (max-width:640px) { main { padding:20px 12px 48px; } article { border-radius:12px; } }
+</style>
+</head>
+<body>
+<main>
+<article><h1 id="schwab-py-fork-comparison">Schwab-py fork comparison</h1>
+<p><strong>Reviewed:</strong> 2026-11-02<br />
+<strong>Scope:</strong> Public GitHub source, project metadata, commit ancestry, releases, tests, docs, and local package/plugin compatibility checks. No live Schwab API calls were performed. Commit counts below come from cloning each public <code>main</code> ref and comparing its Git history to <code>alexgolec/schwab-py</code> <code>main</code> on the review date.</p>
+<h2 id="recommendation">Recommendation</h2>
+<p>For <code>schwab-pi</code>, <strong>Yoshishima is the best starting point if the plugin can require Python 3.12+</strong>: it preserves the <code>schwab</code> import and <code>schwab-py</code> distribution, stays on the original project's Git history, has cross-platform CI, and carries a focused set of security, order, streaming, and query fixes. Pin an exact commit and resolve its release-version mismatch before relying on it: the checkout and latest GitHub Release are tagged <code>v1.7.3</code>, while <code>schwab/version.py</code> and the README still identify <code>1.7.2</code>.</p>
+<p>If the immediate problem is specifically Authlib 1.8's switch from <code>httpx</code> to <code>httpx2</code>, <strong>Jubishop is a narrow compatibility patch</strong>; consider backporting the change rather than treating this one-commit fork as a maintained replacement. <strong>Hu1kSmash's <code>schwaby</code> is the most active and substantially developed alternative</strong>, with a separate package name and release line. It should be evaluated as a migration or side-by-side pilot, not swapped into code importing <code>schwab</code> without changes.</p>
+<h2 id="snapshot">Snapshot</h2>
+<table>
+<thead>
+<tr>
+<th>Repository</th>
+<th>Upstream relationship and observed activity</th>
+<th>Packaging / Python</th>
+<th>Practical fit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/alexgolec/schwab-py">alexgolec/schwab-py</a></td>
+<td>Main's last commit is <code>43c4614</code> (2025-08-04). GitHub Releases lists <code>v1.5.0</code> as latest; the main tree's package version is <code>1.5.1</code>.</td>
+<td>Distribution <code>schwab-py</code>, import <code>schwab</code>, Python <code>&gt;=3.10</code>, <code>httpx</code> and Authlib <code>&gt;=1.6</code>.</td>
+<td>Established interface, but little visible upstream source movement since August 2025 and an open backlog of reports relevant to auth, order prices, and streaming.</td>
+</tr>
+<tr>
+<td><a href="https://github.com/jubishop/schwab-py">jubishop/schwab-py</a></td>
+<td>Direct child of upstream commit <code>43c4614</code>; one commit ahead, dated 2026-10-09.</td>
+<td>Same <code>schwab-py</code> / <code>schwab</code> names and Python <code>&gt;=3.10</code>; replaces <code>httpx</code> with <code>httpx2</code> and requires Authlib <code>&gt;=1.8</code>.</td>
+<td>Lowest change surface for the Authlib/httpx2 compatibility issue; otherwise essentially upstream at its 2025 baseline.</td>
+</tr>
+<tr>
+<td><a href="https://github.com/yoshishima/schwab-py">yoshishima/schwab-py</a></td>
+<td>Direct child of the same upstream baseline; 39 commits ahead, none behind. Latest main commit is 2026-10-16.</td>
+<td>Same <code>schwab-py</code> / <code>schwab</code> names; Python <code>&gt;=3.12</code>; uses <code>httpx2</code> and newer <code>websockets</code>.</td>
+<td>Best near-drop-in maintained line if Python 3.12+ is acceptable; behavior and dependencies changed, so test integration.</td>
+</tr>
+<tr>
+<td><a href="https://github.com/Hu1kSmash/schwaby">Hu1kSmash/schwaby</a></td>
+<td>Separate history/project derived from upstream; no Git merge base with upstream main. Latest main commit is 2026-10-31; its latest release is <code>5.2.0</code> (2026-10-24).</td>
+<td>Distribution and import are both <code>schwaby</code>; Python <code>&gt;=3.10</code>; uses <code>httpx2</code> and Authlib <code>&gt;=1.8</code>.</td>
+<td>Most active and most extensively changed, with strong release/test machinery, but requires import and integration migration.</td>
+</tr>
+</tbody>
+</table>
+<p>The original's repository and release metadata are available in its <a href="https://github.com/alexgolec/schwab-py/commits/main/">main history</a>, <a href="https://github.com/alexgolec/schwab-py/releases">release page</a>, <a href="https://github.com/alexgolec/schwab-py/blob/main/setup.py">setup configuration</a>, and <a href="https://github.com/alexgolec/schwab-py/blob/main/.github/workflows/python.yml">Python CI workflow</a>. Its current setup still allows Python 3.10+, while its workflow tests 3.10–3.14-dev across Windows, Linux, and macOS. GitHub's latest listed release is v1.5.0; the source tree reports 1.5.1.</p>
+<h2 id="per-fork-assessment">Per-fork assessment</h2>
+<h3 id="jubishop">Jubishop</h3>
+<p>The fork's single commit is explicitly a fix for upstream <a href="https://github.com/alexgolec/schwab-py/issues/268">issue #268</a>: Authlib 1.8 now builds OAuth clients on <code>httpx2</code>, so Schwab's own requests, exception handling, and OAuth response types need to use the same HTTP library. The commit updates Authlib and HTTP dependencies, replaces <code>httpx</code> imports/checks with <code>httpx2</code>, updates docs and tests, and states that exposed responses/errors become <code>httpx2</code> types. It changes 17 files but remains only one commit past upstream. (<a href="https://github.com/jubishop/schwab-py/commit/4d6c9d1560e6cf9ff9697502a65a2288b762b1bc">commit</a>)</p>
+<p>The distribution and import names remain compatible with existing <code>schwab-py</code> use, and its Python floor remains 3.10. However, the package version remains the inherited 1.5.1 and <code>setup.py</code> still identifies the upstream project for source/issues. This is useful as a patch reference; it provides little evidence of a separate long-term release or maintenance plan. Because HTTP responses and exceptions become <code>httpx2</code> classes, callers that type-check against <code>httpx.Response</code> or its exceptions still need review.</p>
+<h3 id="yoshishima">Yoshishima</h3>
+<p>This is the closest maintained continuation of upstream: its history descends from the same <code>43c4614</code> baseline and adds 39 commits. Its README lists callback/OAuth robustness, safer token writes, more robust stream dispatch, Decimal-based price calculations, and query validation. The source history includes migrations to <code>httpx2</code>, Decimal price fixes, and token/logging hardening; the latest commit covers refresh-token handling and sensitive-data redaction. (<a href="https://github.com/yoshishima/schwab-py/blob/main/README.md">README</a>, <a href="https://github.com/yoshishima/schwab-py/commit/3d6aabbac2d9207e7ca17109c958253c8eed53a2">httpx2 migration</a>, <a href="https://github.com/yoshishima/schwab-py/commit/16f5b2b1ea0245fe403f66e58e8da30dab248577">Decimal price fix</a>, <a href="https://github.com/yoshishima/schwab-py/commit/5ec39c5c8a8e142c0a60959e0e4d905fbff815c9">latest security commit</a>)</p>
+<p>The repo retains <code>import schwab</code> and the <code>schwab-py</code> distribution, and tells users to install from its GitHub URL because PyPI and Read the Docs remain upstream-maintained. Its CI runs Python 3.12, 3.13, and 3.14 on all three major desktop/server OS families. The decisive compatibility cost is its <code>python_requires='&gt;=3.12'</code>; it also changes the raw HTTP response type to <code>httpx2</code>, raises dependency minimums, and tightens some inputs/behavior. (<a href="https://github.com/yoshishima/schwab-py/blob/main/setup.py">setup.py</a>, <a href="https://github.com/yoshishima/schwab-py/blob/main/.github/workflows/python.yml">CI workflow</a>)</p>
+<p>There is a release identity discrepancy to resolve before pinning by tag: the Git checkout's <code>HEAD</code> and latest GitHub Release are tagged <code>v1.7.3</code>, but <code>schwab/version.py</code> and README say <code>1.7.2</code>. Pinning the full commit SHA avoids ambiguity while the maintainer clarifies the release. (<a href="https://github.com/yoshishima/schwab-py/blob/main/schwab/version.py">version file</a>, <a href="https://github.com/yoshishima/schwab-py/releases">releases</a>)</p>
+<h3 id="hu1ksmash-schwaby">Hu1kSmash / schwaby</h3>
+<p>This has become a separate project, not a branch that can be merged from the original's Git history. Its changelog says it began from <code>schwab-py</code> and has been a separate project since 2.2.0; its README describes the reasons and retained MIT licensing/attribution. It has its own <code>5.x</code> release line, current changelog, and ongoing commits. (<a href="https://github.com/Hu1kSmash/schwaby/blob/main/README.md">README</a>, <a href="https://github.com/Hu1kSmash/schwaby/blob/main/CHANGELOG.md">changelog</a>, <a href="https://github.com/Hu1kSmash/schwaby/releases">releases</a>)</p>
+<p>The most significant migration change is intentional: both the installed distribution and package import are <code>schwaby</code>, so it can coexist with <code>schwab-py</code> but existing <code>from schwab ...</code> imports must be rewritten. The project retains Python <code>&gt;=3.10</code>, uses <code>httpx2</code>/Authlib <code>&gt;=1.8</code>, and documents broader fixes around exact order prices, token-file safety, streaming errors/lifecycle, and validation. Its CI covers Python 3.10–3.14, with Linux on each push, all three OSes on pull requests/tags/manual runs, and a weekly fresh dependency-resolution job. (<a href="https://github.com/Hu1kSmash/schwaby/blob/main/setup.py">setup.py</a>, <a href="https://github.com/Hu1kSmash/schwaby/blob/main/.github/workflows/python.yml">tests workflow</a>, <a href="https://github.com/Hu1kSmash/schwaby/blob/main/.github/workflows/fresh.yml">fresh-resolve workflow</a>)</p>
+<p>The project's source and test surface is much larger than the upstream-based fork's. That is evidence of active maintenance, but also means the API and behavior should be treated as its own product. Its README explicitly warns users that the library places real orders and its changelog records behavior and security changes; for an existing plugin, first test it side-by-side and reconcile one or two paper/live-disabled test paths before considering migration.</p>
+<h2 id="upstream-signals-and-migration-checks">Upstream signals and migration checks</h2>
+<p>The original repo has open reports for the Authlib/httpx2 transition (<a href="https://github.com/alexgolec/schwab-py/issues/268">#268</a>), float truncation lowering some prices by a cent (<a href="https://github.com/alexgolec/schwab-py/issues/239">#239</a>), stream requests that can wait forever (<a href="https://github.com/alexgolec/schwab-py/issues/237">#237</a>), missing stream shutdown (<a href="https://github.com/alexgolec/schwab-py/issues/235">#235</a>), and token-file permissions/atomicity (<a href="https://github.com/alexgolec/schwab-py/issues/231">#231</a>). These are reports, not independent reproductions in this review; check their current status and reproduce against the plugin's locked dependency set before treating them as confirmed in your deployment.</p>
+<p>For either <code>schwab-py</code> fork, check these before changing the plugin lock:</p>
+<ol>
+<li>The plugin's runtime must meet the fork's Python floor. Yoshishima requires 3.12; Jubishop and schwaby allow 3.10.</li>
+<li>Search for assumptions about <code>httpx.Response</code>/<code>httpx</code> exceptions. The forks using Authlib 1.8 expose <code>httpx2</code> response/error types.</li>
+<li>Exercise auth refresh and token-file handling; order construction and price serialization; stream subscription, timeout, handler failure, and shutdown; and the plugin's error/status-code handling.</li>
+<li>Pin an immutable commit or verified tag. This matters especially for Yoshishima's tag/version mismatch and for GitHub-installed versions that are not the upstream PyPI release.</li>
+<li>If staying on upstream, the Jubishop change is the smallest reference implementation for the Authlib/httpx2 transition. If moving to a more fully maintained upstream-compatible line, compare the exact Yoshishima diff against the plugin's dependency policy before adopting it.</li>
+</ol>
+<h2 id="local-compatibility-evidence">Local compatibility evidence</h2>
+<p>Local checks used Python 3.13.13 in isolated virtual environments:</p>
+<ul>
+<li>The current <code>schwab-pi</code> suite passed all 23 tests against the original checkout, Jubishop, and Yoshishima. Those tests mainly verify the plugin's wrappers and mocks; they do not fully exercise real HTTP response classes.</li>
+<li>Jubishop's own suite passed 677 tests locally. Its fork does not currently publish releases or run Actions on its own repository, so this local result is the main execution evidence beyond its upstream pull request.</li>
+<li>A targeted Yoshishima check confirmed that an HTTP 429 raises <code>httpx2.HTTPStatusError</code>. The plugin's current <code>response_json()</code> catches <code>httpx.HTTPStatusError</code>, so its custom 429 guidance is skipped. This needs a plugin change for Yoshishima, Jubishop, or <code>schwaby</code> despite the 23 wrapper tests passing.</li>
+<li>Hu1kSmash cannot be dropped into the current test environment unchanged because the plugin imports <code>schwab.*</code> while the project intentionally exports <code>schwaby.*</code>. Its public CI was green at the reviewed main commit, including the scheduled fresh-dependency-resolution workflow.</li>
+</ul>
+</article>
+<footer>Independent technical evaluation prepared November 2, 2026. No live Schwab account or order calls were made.</footer>
+</main>
+</body>
+</html>
